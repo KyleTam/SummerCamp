@@ -1,71 +1,110 @@
 LootChest.Game = function(game)
-{
-	this.map;
-	this.tileset;
-	this.layer;
-	this.player;
-	this.facing = 'left';
-	this.jumpTimer = 0;
-	this.cursors;
-	this.jumpButton;
-	this.chest;
-	this.sword1;
-	this.sword2;
-	this.chip;
-
-
+{	
+		this.map;
+		this.tileset;
+		this.layer;
+		this.player;
+		this.chests;
+		this.Sword;
+		this.sword2;
+		this.chips;
 };
 
-LootChest.Game.prototype =
- {
-
-		preload: function()
-		{
-
-
-		},
-
-		create: function()
-		{
-			this.physics.startSystem(Phaser.Physics.ARCADE);
-			this.stage.backgroundColor = '#008800';
-			
-			this.map = this.add.tilemap('level');
-			this.map.addTilesetImage('tiles-1');
-			this.map.setCollisionByExclusion([13,15,16,46,47,48,49,50,51]);
-			
-			this.layer = this.map.createLayer('Tile Layer 1');
-			this.layer.resizeWorld();
-			this.physics.arcade.gravity.y = 250;
-			
-			this.player = this.add.sprite(32,32,'player');
-			this.physics.enable(this.player, Phaser.Physics.ARCADE);
-			this.player.body.bounce.y = 0.2;
-			this.player.body.collideWorldBounds = true;
-			this.player.body.setSize(20,32,5,16);
-			this.player.animations.add('left',[0,1,2,3],10,true);
-			this.player.animations.add('right',[5,6,7,8],10,true);
-			this.player.animations.add('turn',[4],20,true);
-			this.camera.follow(this.player)
-			this.cursors = this.input.keyboard.createCursorKeys();
-			this.jumpButton = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-			
-
-
-
-		},
-
-		update: function()
-		{
-
-
+LootChest.Game.prototype = 
+{
+	preload: function()
+	{},
+	
+	create: function()
+	{
+		this.physics.startSystem(Phaser.Physics.ARCADE);
+		this.stage.backgroundColor = '#008800';
+		
+		this.map = this.add.tilemap('level');
+		this.map.addTilesetImage('tiles-1');
+		this.map.setCollisionByExclusion([13,15,16,46,47,48,49,50,51]);
+		
+		this.layer = this.map.createLayer('Tile Layer 1');
+		this.layer.resizeWorld();
+		
+		this.physics.arcade.gravity.y = 250;
+		this.chests = this.add.group();
+		this.chips = this.add.group();
+		this.swords = this.add.group();
+		
+		this.chests.add(new LootChest.Chest(this.game,100,172));
+	
+		
+		
+		this.player = new LootChest.Player(this.game,32,32);
+		
+		this.camera.follow(this.player);
+		
+	},
+	
+	update: function()
+	{
+	this.physics.arcade.collide(this.player,this.layer);
+	this.physics.arcade.collide(this.chips,this.layer);
+	this.physics.arcade.collide(this.chips,this.chips)
+	this.physics.arcade.overlap(this.player,this.chests,this.chestOverlap,null,this);
+	this.physics.arcade.overlap(this.player,this.chips,this.chipOverlap,null,this);
+	this.physics.arcade.collide(this.swords,this.layer);
+	this.player.update();
+	
+	
+	},
+	render: function()
+	{
+		this.game.debug.body(this.player);
+		this.game.debug.bodyInfo(this.player,16,24);
+		this.game.debug.body(this.chests);
+	},
+	chestOverlap: function(player,chest)
+	{
+		if(!chest.opened){
+			chest.open(player);
+			for(var i =0; i< chest.chipAmount; i++){
+				this.createChip(chest.x,chest.y);
+			}
+			this.createSword(chest.x,chest.y);
 		}
+	
+	},
+	chipOverlap: function(player,chip)
+	{
+		chip.collect(player);
+	
+	},
 
-
-
-
-
-
-
-
+	createChip: function(x,y)
+	{
+	var chip = new LootChest.Chip(this.game,x,y);
+		chip.body.velocity.x = this.game.rnd.integerInRange(-20,20);
+		chip.body.velocity.y = this.game.rnd.integerInRange(-20,0);
+		this.chips.add(chip);
+		
+	},
+		createSword: function(x,y)
+	{
+	var Sword = new LootChest.Sword(this.game,x,y);
+		Sword.body.velocity.x = this.game.rnd.integerInRange(-20,20);
+		Sword.body.velocity.y = this.game.rnd.integerInRange(-20,0);
+		this.swords.add(Sword);
+		
+	},
+	
+		equipSword: function(player,Sword)
+		{
+			if(player.x,player.y = Sword.x,sword.y)
+			{
+				this.player.addExisting(Sword);
+			
+			}
+		
+		
+		
+		
+		}
+	
 };
